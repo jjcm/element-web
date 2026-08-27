@@ -16,6 +16,7 @@ import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import TerserPlugin from "terser-webpack-plugin";
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 import HtmlWebpackInjectPreload from "@principalstudio/html-webpack-inject-preload";
+import CompressionPlugin from "compression-webpack-plugin";
 import CopyWebpackPlugin from "copy-webpack-plugin";
 import VersionFilePlugin from "webpack-version-file-plugin";
 import { RetryChunkLoadPlugin } from "webpack-retry-chunk-load-plugin";
@@ -750,7 +751,19 @@ export default (env: string, argv: Record<string, any>): webpack.Configuration =
                 retryDelay: 500,
                 maxRetries: 3,
             }),
-        ],
+
+            // Emit precompressed (gzip) siblings of compressible assets so the
+            // webserver can serve them directly (e.g. nginx `gzip_static on`),
+            // avoiding multi-MB uncompressed JS/CSS transfers on first load.
+            !devMode &&
+                new CompressionPlugin({
+                    test: /\.(js|css|html|json|svg|txt|map|wasm|mjs)$/,
+                    algorithm: "gzip",
+                    compressionOptions: { level: 9 },
+                    threshold: 1024,
+                    minRatio: 0.9,
+                }),
+        ].filter(Boolean),
 
         output: {
             path: path.join(__dirname, "webapp"),
