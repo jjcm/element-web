@@ -20,7 +20,7 @@
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'none';
         style-src 'self' 'unsafe-inline' <%= csp_extra_source %>;
-        script-src 'self' 'wasm-unsafe-eval' https://www.recaptcha.net/recaptcha/ https://www.gstatic.com/recaptcha/ <%= csp_extra_source %>;
+        script-src 'self' 'wasm-unsafe-eval' 'sha256-ZMTJ2TphEjbQNzZzXNXWVTBIe6Ed/L6UxlaifArbYL4=' https://www.recaptcha.net/recaptcha/ https://www.gstatic.com/recaptcha/ <%= csp_extra_source %>;
         img-src * blob: data:;
         connect-src * blob:;
         font-src 'self' data: <%= csp_extra_source %>;
@@ -53,7 +53,17 @@
   </head>
   <body style="height: 100%; margin: 0;">
     <noscript>Sorry, Element requires JavaScript to be enabled.</noscript> <!-- TODO: Translate this? -->
-    <div id="matrixchat" style="height: 100%;" class="notranslate"></div>
+    <div id="matrixchat" style="height: 100%;" class="notranslate"><!--
+      Static boot shell: paints the auth-page scaffold (background and footer)
+      immediately, long before the app bundles load. React replaces it when the
+      app mounts. The inline script below (allowlisted by CSP hash) removes it
+      for sessions that already have credentials, so signed-in users keep the
+      plain loading background instead of a flash of the signed-out shell.
+      --><div id="mx_boot_shell" style="width: 100%; height: 100vh; display: flex; flex-direction: column; background-color: #2e3649;">
+        <footer style="margin-top: auto; text-align: center; width: 100%; font: 400 15px/20px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif; opacity: 0.72; padding: 20px 0; background: linear-gradient(rgb(0, 0, 0, 0), rgb(0, 0, 0, 0.8));">
+          <a href="https://element.io/blog" target="_blank" rel="noreferrer noopener" style="color: #f4f6fa; margin: 0 22px; text-decoration: none;">Blog</a><a href="https://mastodon.matrix.org/@Element" target="_blank" rel="noreferrer noopener" style="color: #f4f6fa; margin: 0 22px; text-decoration: none;">Mastodon</a><a href="https://github.com/element-hq/element-web" target="_blank" rel="noreferrer noopener" style="color: #f4f6fa; margin: 0 22px; text-decoration: none;">GitHub</a><a href="https://matrix.org" target="_blank" rel="noreferrer noopener" style="color: #f4f6fa; margin: 0 22px; text-decoration: none;">Powered by Matrix</a>
+        </footer>
+      </div><script>try{if(localStorage.getItem("mx_has_access_token")==="true")document.getElementById("mx_boot_shell").remove()}catch(e){}</script></div>
 
 <%
     // insert <script> tags for the JS entry points
