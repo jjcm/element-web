@@ -15,7 +15,9 @@ server {
     # NB http://your-domain/ and http://your-domain/? are also covered by this
 
     location = /index.html {
-        add_header Cache-Control "no-cache";
+        # A short freshness window: repeat visits within a minute skip the
+        # revalidation round trip, while updates still roll out promptly.
+        add_header Cache-Control "public, max-age=60, must-revalidate";
     }
     # Bundles are content-hashed (webapp/bundles/<hash>/...), so they can be
     # cached forever and never need revalidation.
